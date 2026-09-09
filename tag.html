@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Report a problem · Pinky's Rentals</title>
+<meta name="theme-color" content="#ff2d8c">
+<link rel="icon" href="icon-192.png">
+<link rel="stylesheet" href="app.min.css">
+<style>
+  body { background: var(--bg); }
+  .wrap { max-width: 460px; margin: 0 auto; padding: 1.2rem 1rem 3rem; }
+  .logo { display: block; width: 160px; margin: .5rem auto 1rem; border-radius: 12px; background: #eaeaea; padding: 4px; }
+  .code { font-size: 2rem; letter-spacing: .4em; text-align: center; font-family: ui-monospace, Menlo, monospace; }
+  .choice { display: block; width: 100%; text-align: left; padding: .9rem 1rem; margin-bottom: .6rem; background: var(--bg2); border: 1px solid var(--line); border-radius: var(--radius); cursor: pointer; }
+  .choice.active { border-color: var(--pink); box-shadow: 0 0 0 3px rgba(255,45,140,.2); }
+  .choice b { display: block; }
+</style>
+</head>
+<body>
+<div class="wrap" id="app"><div class="loading"><span class="spinner"></span></div></div>
+<script type="module">
+import { initDb, db, TICKET_CATEGORIES, html, esc, render, $ } from './tag.min.js';
+
+const app = $('#app');
+const params = new URLSearchParams(location.search);
+await initDb();
+
+function codeScreen(err = '') {
+  render(app, html`
+    <img class="logo" src="logo.png" alt="Pinky's Rentals">
+    <h1 class="center">Machine problem?</h1>
+    <p class="center muted">Type the 4-digit number printed under the QR sticker.</p>
+    ${err ? `<div class="notice bad">${esc(err)}</div>` : ''}
+    <form id="cf" class="card">
+      <input class="code" type="text" inputmode="numeric" maxlength="6" name="code" autocomplete="off" autofocus value="${esc(params.get('m') || '')}" placeholder="0000">
+      <button class="btn block" style="margin-top:.8rem" type="submit">Next</button>
+    </form>
+    <p class="center small dim">Pinky's Rentals · hello@pinkysrentals.co.uk</p>
+  `);
+  $('#cf').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const code = e.target.code.value.trim();
+    const tag = await db.get('publicTags', code).catch(() => null);
+    if (!tag || tag.sold) return codeScreen(`No machine found for ${code}. Check the number under the sticker.`);
+    reportScreen(code, tag);
+  });
+}
+
+function reportScreen(code, tag) {
+  let category = 'mechanical';
+  render(app, html`
+    <img class="logo" src="logo.png" alt="Pinky's Rentals">
+    <h1 class="center">${esc(tag.name)}</h1>
+    <p class="center muted">Machine ${esc(code)} · What's the problem?</p>
+    <form id="rf">
+      ${TICKET_CATEGORIES.map(c => `<button type="button" class="choice ${c.id === category ? 'active' : ''}" data-cat="${c.id}"><b>${esc(c.label)}</b><span class="small muted">${{ mechanical: "Not working, stuck, broken part", payment: 'Took my money / no credit given', other: 'Anything else' }[c.id]}</span></button>`).join('')}
+      <div class="card">
+        <div class="field"><label>Tell us what happened</label><textarea name="description" required placeholder="e.g. paid £1 on card, game didn't start"></textarea></div>
+        <div class="field"><label>Your name or number (optional, if you'd like a reply)</label><input type="text" name="contact" autocomplete="off"></div>
+        <button class="btn block" type="submit">Send report</button>
+      </div>
+    </form>
+  `);
+  app.querySelectorAll('[data-cat]').forEach(b => b.addEventListener('click', () => { category = b.dataset.cat; app.querySelectorAll('[data-cat]').forEach(x => x.classList.toggle('active', x === b)); }));
+  $('#rf').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const f = e.target; f.querySelector('button[type=submit]').disabled = true;
+    try {
+      await db.add('faultQueue', { assetTag: code, machineId: tag.machineId, machineName: tag.name, category, description: f.description.value.trim().slice(0, 1000), contact: f.contact.value.trim().slice(0, 120), submittedAt: new Date().toISOString(), status: 'pending', userAgent: navigator.userAgent.slice(0, 120) });
+      render(app, html`<img class="logo" src="logo.png" alt=""><div class="card center"><h1>Thanks!</h1><p>We've got your report about <b>${esc(tag.name)}</b> and we'll get it sorted.</p><p class="small muted">If the machine took your money, speak to the venue staff and they can help.</p></div>`);
+    } catch (ex) { console.error(ex); f.querySelector('button[type=submit]').disabled = false; alert("Couldn't send the report — please try again."); }
+  });
+}
+codeScreen();
+</script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "name": "Fleet Ledger \u00b7 Pinky's Rentals",
+  "short_name": "Fleet Ledger",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0d0d0d",
+  "theme_color": "#ff2d8c",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
