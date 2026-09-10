@@ -16,6 +16,12 @@
   .choice { display: block; width: 100%; text-align: left; padding: .9rem 1rem; margin-bottom: .6rem; background: var(--bg2); border: 1px solid var(--line); border-radius: var(--radius); cursor: pointer; }
   .choice.active { border-color: var(--pink); box-shadow: 0 0 0 3px rgba(255,45,140,.2); }
   .choice b { display: block; }
+  .choice.primary { padding: 1.6rem 1.2rem; margin: .4rem 0 1rem; border: 2px solid var(--pink); background: linear-gradient(180deg, rgba(255,45,140,.14), rgba(255,45,140,.04)); box-shadow: 0 0 14px rgba(255,45,140,.55), 0 0 40px rgba(255,45,140,.25), inset 0 0 18px rgba(255,45,140,.08); animation: glow 2.2s ease-in-out infinite alternate; }
+  .choice.primary b { font-size: 1.55rem; margin-bottom: .25rem; }
+  .choice.primary span { font-size: 1rem; }
+  .choice.secondary { opacity: .8; }
+  @keyframes glow { from { box-shadow: 0 0 10px rgba(255,45,140,.45), 0 0 30px rgba(255,45,140,.2); } to { box-shadow: 0 0 20px rgba(255,45,140,.8), 0 0 56px rgba(255,45,140,.35); } }
+  @media (prefers-reduced-motion: reduce) { .choice.primary { animation: none; } }
   .machine-id { display: flex; align-items: center; gap: .9rem; padding: .7rem .9rem; }
   .tag.big { font-size: 1.5rem; padding: .3rem .6rem; }
   h2.center { margin-top: .4rem; }
