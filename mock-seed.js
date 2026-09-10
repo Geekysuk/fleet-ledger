@@ -56,6 +56,7 @@ export function seed() {
   const nayaxDevices = {};
   for (const [id, m] of Object.entries(machines)) for (const s of m.nayaxSerials) nayaxDevices[s] = { machineId: id, label: m.name };
   const publicTags = {};
-  for (const [id, m] of Object.entries(machines)) publicTags[m.assetTag] = { machineId: id, name: m.name };
-  return { venues, machines, takings, repayments, tickets, faultQueue, nayaxDevices, publicTags, nayaxImports: {}, costs: {}, settings: { app: { migratedFinance: true } } };
+  for (const [id, m] of Object.entries(machines)) publicTags[m.assetTag] = { machineId: id, name: m.name, sold: false, venueId: m.currentVenueId, venueName: venues[m.currentVenueId]?.name || '' };
+  const countQueue = { cq1: { assetTag: '3002', machineId: 'm3002', machineName: 'Iron Maiden', venueId: 'spacebar-arcade', venueName: 'Spacebar Arcade', cash: 212.5, meterReading: null, submittedAt: new Date(Date.now() - 86400000).toISOString(), status: 'pending' } };
+  return { venues, machines, takings, repayments, tickets, faultQueue, countQueue, nayaxDevices, publicTags, nayaxImports: {}, costs: {}, settings: { app: { migratedFinance: true } } };
 }
