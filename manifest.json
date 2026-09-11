@@ -1,6 +1,6 @@
 {
-  "name": "Fleet Ledger \u00b7 Pinky's Rentals",
-  "short_name": "Fleet Ledger",
+  "name": "Pinky's Ledger",
+  "short_name": "Pinky's Ledger",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#0d0d0d",
